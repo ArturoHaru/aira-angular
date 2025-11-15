@@ -1,0 +1,5 @@
+<h4>Chatbox</h4>
+<button (click)="askChatbot()">Ask</button>
+@let answerText = answerText$ | async; @if(answerText){
+<p>{{ answerText.content }}</p>
+}
