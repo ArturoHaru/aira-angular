@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, HostListener, OnInit } from '@angular/core';
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
+import { window } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -9,25 +10,17 @@ export class AzureTranscriber {
   private readonly speechKey: string =
     '3RIZO6ivPaNQxpKRDEEzr27U75q9RpGWmjMH0Yx3M1i7i8hJ6X9pJQQJ99BAAC5RqLJXJ3w3AAAYACOGZf7r';
   private readonly speechRegion: string = 'westeurope';
-  recognizer: sdk.SpeechRecognizer;
-
-  constructor() {
-    const speechConfig = sdk.SpeechConfig.fromSubscription(this.speechKey, this.speechRegion);
-    const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
-    this.recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
-  }
-
-  public async dispose() {
-    return await new Promise(() => {
-      let error = this.recognizer.close();
-      console.log(error);
-    });
-  }
+  recognizer: sdk.SpeechRecognizer | null = null;
 
   public async transcribeOnce() {
+    if (!this.recognizer) {
+      const speechConfig = sdk.SpeechConfig.fromSubscription(this.speechKey, this.speechRegion);
+      const audioConfig = sdk.AudioConfig.fromDefaultMicrophoneInput();
+      this.recognizer = new sdk.SpeechRecognizer(speechConfig, audioConfig);
+    }
+
     this.recognizer.canceled = (s, e) => {
       console.log(`CANCELED: Reason=${e.reason}`);
-
       if (e.reason === sdk.CancellationReason.Error) {
         console.error(`CANCELED: ErrorCode=${e.errorCode}`);
         console.error(`CANCELED: ErrorDetails=${e.errorDetails}`);
@@ -35,14 +28,31 @@ export class AzureTranscriber {
     };
 
     return await new Promise<string>((resolve, reject) => {
-      this.recognizer.recognizeOnceAsync(
-        (result) => {
-          resolve(result.text);
-        },
-        (err) => {
-          reject(err);
-        },
-      );
+      if (this.recognizer)
+        this.recognizer.recognizeOnceAsync(
+          (result) => {
+            resolve(result.text);
+          },
+          (err) => {
+            reject(err);
+          },
+        );
+    });
+  }
+
+  //Host listener should intercept attempts of leaving the page to close the connection
+  @HostListener('window:beforeunload')
+  handleReload() {
+    console.log('Disposing');
+    this.dispose();
+  }
+
+  public async dispose() {
+    return await new Promise(() => {
+      if (this.recognizer) {
+        this.recognizer.close();
+        location.reload();
+      } else console.error("Recognizer is null, can't close null recognizer.");
     });
   }
 }
