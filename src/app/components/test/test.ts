@@ -1,18 +1,18 @@
-import { Component, signal } from '@angular/core';
-import { AzureTranscriber } from '../../services/azure-transcriber';
+import { Component, signal } from "@angular/core";
+import { AzureTranscriber } from "../../services/azure-transcriber";
 
 @Component({
-  selector: 'app-test',
+  selector: "app-test",
   imports: [],
-  templateUrl: './test.html',
-  styleUrl: './test.scss',
+  templateUrl: "./test.html",
+  styleUrl: "./test.scss",
 })
 export class Test {
   // Nel tuo Componente Angular
 
   constructor(private azureTranscriber: AzureTranscriber) {}
 
-  text = signal('');
+  text = signal("");
 
   async startTranscription() {
     try {
@@ -20,11 +20,14 @@ export class Test {
       this.text.set(transcription);
       // Qui puoi aggiornare la tua UI con il risultato
     } catch (error) {
-      console.error('Si è verificato un errore durante la trascrizione:', error);
+      console.error(
+        "Si è verificato un errore durante la trascrizione:",
+        error,
+      );
     }
   }
 
-  async disposeRecognizer() {
+  disposeRecognizer() {
     this.azureTranscriber.dispose();
   }
 }
