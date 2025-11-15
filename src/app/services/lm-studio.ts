@@ -11,6 +11,8 @@ export class LmStudio {
   private http = inject(HttpClient);
 
   getResponse(prompt: string): Observable<{ content: string }> {
-    return this.http.post<{ content: string }>(this.apiUrl, null);
+    return this.http.post<{ content: string }>(this.apiUrl, {
+      messages: prompt,
+    });
   }
 }
