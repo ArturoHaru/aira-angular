@@ -16,6 +16,9 @@ export class VadPage {
       () => {
         this.color.set('red');
       },
+      () => {
+        this.color.set('red');
+      },
     );
   }
 

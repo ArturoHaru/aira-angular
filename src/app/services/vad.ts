@@ -8,18 +8,21 @@ import { MicVAD } from '@ricky0123/vad-web';
 export class Vad {
   private vadObject: MicVAD | null = null;
 
-  public async initVad(onVAD: () => void, onVADEnd: () => void) {
+  public async initVad(onVAD: () => void, onVADEnd: () => void, onMisfire: () => void) {
     this.vadObject = await MicVAD.new({
       baseAssetPath: '/',
       onnxWASMBasePath: '/',
+      minSpeechMs: 300,
+      redemptionMs: 100,
       onSpeechEnd: (audio) => {
         onVADEnd();
       },
       onSpeechStart: () => {
         onVAD();
       },
-      minSpeechMs: 100,
-      redemptionMs: 100,
+      onVADMisfire: () => {
+        onMisfire();
+      },
     });
   }
 
