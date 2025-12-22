@@ -8,13 +8,15 @@ import { Vad } from '../services/vad';
   styleUrl: './vad-page.scss',
 })
 export class VadPage {
+  color = signal('red');
+
   constructor(public vad: Vad) {
     vad.initVad(
       () => {
         this.color.set('blue');
       },
       () => {
-        this.color.set('red');
+        this.onStopSpeaking();
       },
       () => {
         this.color.set('red');
@@ -22,5 +24,7 @@ export class VadPage {
     );
   }
 
-  color = signal('red');
+  onStopSpeaking() {
+    this.color.set('red');
+  }
 }
