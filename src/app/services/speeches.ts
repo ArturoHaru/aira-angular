@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import OpenAI from 'openai';
+import { Audio } from 'openai/resources.js';
 
 /**
  * Defines the structure for the text-to-speech request body.
@@ -14,13 +16,17 @@ export interface SpeechesRequestBody {
 }
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SpeechesService {
+  private apiUrl = 'http://lily.home:8000/v1/audio/speech';
+  private client = new OpenAI({
+    baseURL: 'http://lily.home:8000/v1/',
+    apiKey: 'no-need',
+    dangerouslyAllowBrowser: true,
+  });
 
-  private apiUrl = 'http://localhost:8000/v1/audio/speech';
-
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   /**
    * Sends text to the Speaches server for TTS and returns the audio as a Blob.
@@ -35,7 +41,16 @@ export class SpeechesService {
     };
 
     return this.http.post(this.apiUrl, body, {
-      responseType: 'blob'
+      responseType: 'blob',
     });
+  }
+
+  speechToText(audio: Blob) {
+    let transcription = this.client.audio.transcriptions.create({
+      model: 'kp-forks/faster-whisper-small',
+      file: audio,
+    });
+
+    return transcription;
   }
 }

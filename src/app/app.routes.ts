@@ -8,7 +8,7 @@ export const routes: Routes = [
     component: VadPage,
   },
   {
-    path: 'talkbot',
+    path: '',
     component: TestTalkbot,
   },
 ];
