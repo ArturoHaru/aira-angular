@@ -1,6 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { Vad } from '../services/vad';
-import { SpeechesService } from '../services/speeches';
+import { SpeechesService } from '../services/speaches';
 
 @Component({
   selector: 'app-vad-page',
@@ -32,8 +32,14 @@ export class VadPage {
   async onStopSpeaking(audio: Float32Array) {
     this.color.set('red');
     let audio_blob = float32ToWavBlob(audio); //gli metto intestazione wav, openai potrebbe non sapere come interpretare il file
-    let transcription = await this.speaches.speechToText(audio_blob);
-    this.text.set(transcription.text);
+    this.speaches.speechToText(audio_blob).subscribe({
+      next: (transcription) => {
+        return transcription;
+      },
+      error: () => {
+        return 'Il server ha restituito un errore durante la trascrizione.';
+      },
+    });
   }
 }
 

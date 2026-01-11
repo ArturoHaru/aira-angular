@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { MicVAD } from '@ricky0123/vad-web';
-import { SpeechesService } from './speeches';
+import { SpeechesService } from './speaches';
 // link to the docs: https://docs.vad.ricky0123.com/
 
 @Injectable({
