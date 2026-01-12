@@ -1,5 +1,6 @@
 import { Injectable, HostListener, OnInit } from '@angular/core';
 import * as sdk from 'microsoft-cognitiveservices-speech-sdk';
+import { environment } from '../../environments/environment.development';
 import { window } from 'rxjs';
 
 @Injectable({
@@ -7,9 +8,8 @@ import { window } from 'rxjs';
 })
 export class AzureTranscriber {
   // **Sostituisci con le tue credenziali di Azure Speech Service**
-  private readonly speechKey: string =
-    '3RIZO6ivPaNQxpKRDEEzr27U75q9RpGWmjMH0Yx3M1i7i8hJ6X9pJQQJ99BAAC5RqLJXJ3w3AAAYACOGZf7r';
-  private readonly speechRegion: string = 'westeurope';
+  private readonly speechKey: string = environment.azureKey;
+  private readonly speechRegion: string = environment.azureRegion;
   recognizer: sdk.SpeechRecognizer | null = null;
 
   public async transcribeOnce() {
