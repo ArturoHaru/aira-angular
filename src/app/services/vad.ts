@@ -35,7 +35,7 @@ export class Vad {
     if (this.vadObject != null) {
       this.vadObject.start();
     } else {
-      console.log('initialize vad object first!');
+      console.log('Inizializza prima il vad!');
     }
   }
 }

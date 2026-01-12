@@ -1,7 +1,7 @@
 <h4>Talkbot</h4>
 <button (click)="startTranscription()">Start Recording</button>
 <p>{{ text() }}</p>
-<button (click)="disposeRecognizer()">Dispose Recognizer</button>
+
 <p>After disposal, reload the page. (you need to reload twice, the button will reload once)</p>
 <h5>Answer</h5>
 @let answerText = answerText$ | async; @if(answerText){
