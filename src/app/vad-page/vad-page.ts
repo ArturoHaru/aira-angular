@@ -1,6 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { Vad } from '../services/vad';
 import { SpeechesService } from '../services/speaches';
+import { Llm } from '../services/llm';
 
 @Component({
   selector: 'app-vad-page',
@@ -15,13 +16,24 @@ export class VadPage {
   constructor(
     public vad: Vad,
     private speaches: SpeechesService,
+    private llm: Llm,
   ) {
     vad.initVad(
       () => {
         this.color.set('blue');
       },
       async (audio) => {
-        await this.onStopSpeaking(audio);
+        let transcription$ = await this.onStopSpeaking(audio);
+        transcription$.subscribe({
+          next: async (transcriptionJson) => {
+            let result$ = await this.llm.sendPrompt(transcriptionJson.text);
+            result$.subscribe({
+              next: (answer) => {
+                this.text.set(answer.content);
+              },
+            });
+          },
+        });
       },
       () => {
         this.color.set('red');
@@ -31,15 +43,8 @@ export class VadPage {
 
   async onStopSpeaking(audio: Float32Array) {
     this.color.set('red');
-    let audio_blob = float32ToWavBlob(audio); //gli metto intestazione wav, openai potrebbe non sapere come interpretare il file
-    this.speaches.speechToText(audio_blob).subscribe({
-      next: (transcription) => {
-        return transcription;
-      },
-      error: () => {
-        return 'Il server ha restituito un errore durante la trascrizione.';
-      },
-    });
+    let audio_blob = float32ToWavBlob(audio); //gli metto intestazione wav, altrimenti openai potrebbe non sapere come interpretare il file
+    return this.speaches.speechToText(audio_blob);
   }
 }
 
