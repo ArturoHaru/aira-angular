@@ -1,6 +1,0 @@
-<h4>Chatbox</h4>
-<input type="text" [formControl]="promptFormControl" />
-<button (click)="askChatbot()">Ask</button>
-@let answerText = answerText$ | async; @if(answerText){
-<p>{{ answerText.content }}</p>
-}

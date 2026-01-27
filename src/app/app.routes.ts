@@ -1,14 +1,9 @@
 import { Routes } from '@angular/router';
-import { VadPage } from './vad-page/vad-page';
-import { TestTalkbot } from './test-talkbot/test-talkbot';
+import { MainPage } from './main-page/main-page';
 
 export const routes: Routes = [
   {
-    path: 'vad',
-    component: VadPage,
-  },
-  {
     path: '',
-    component: TestTalkbot,
+    component: MainPage,
   },
 ];
