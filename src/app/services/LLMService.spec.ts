@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { Llm } from './llm';
+import { LLMService } from './LLMService';
 
 describe('Llm', () => {
-  let service: Llm;
+  let service: LLMService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(Llm);
+    service = TestBed.inject(LLMService);
   });
 
   it('should be created', () => {

@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { Vad } from '../services/vad';
-import { SpeechesService } from '../services/speaches';
-import { Llm } from '../services/llm';
+import { SpeechesService } from '../services/VoiceInteraction';
+import { LLMService } from '../services/LLMService';
 
 @Component({
   selector: 'app-main-page',
@@ -16,7 +16,7 @@ export class MainPage {
   constructor(
     public vad: Vad,
     private speaches: SpeechesService,
-    private llm: Llm,
+    private llm: LLMService,
   ) {
     vad.initVad(
       () => {

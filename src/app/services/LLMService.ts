@@ -5,7 +5,7 @@ import { environment } from '../../environments/environment';
 @Injectable({
   providedIn: 'root',
 })
-export class Llm {
+export class LLMService {
   //questa classe definisce l'interazione con il server llm
   constructor(private http: HttpClient) {}
   serverUrl = environment.serverUrl;
