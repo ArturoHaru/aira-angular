@@ -9,15 +9,14 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class SpeechesService {
-  private serverURL = `${environment.serverUrl}speaches/transcribe`;
+  private serverURL = `${environment.serverUrl}${environment.transcriptionEndpoint}`;
 
   constructor(private http: HttpClient) {}
 
   async speechToText(audio: Blob) {
     const formData = new FormData();
-
     formData.append('file', audio);
-    formData.append('model', 'kp-forks/faster-whisper-small');
+    formData.append('model', environment.transcriptionModel);
 
     return this.http.post<{ text: string }>(this.serverURL, formData);
   }

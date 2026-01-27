@@ -1,6 +1,7 @@
 export const environment = {
   production: false,
   serverUrl: 'http://localhost:4200/api/',
-  azureKey: 'insert key here',
-  azureRegion: 'insert region here',
+  llmEndpoint: 'lmstudio/answer',
+  transcriptionEndpoint: 'speaches/transcribe',
+  transcriptionModel: 'kp-forks/faster-whisper-small',
 };
