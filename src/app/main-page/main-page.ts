@@ -2,6 +2,11 @@ import { Component, OnInit, signal } from '@angular/core';
 import { Vad } from '../services/vad';
 import { VoiceInteraction } from '../services/VoiceInteraction';
 import { OpenWakeWord } from '../services/open-wake-word';
+import { PassiveListening } from './states/passive-listening';
+import { ActiveListening } from './states/active-listening';
+import { SendingData } from './states/sending-data';
+import { float32ToWavBlob } from './audio-converter';
+import { Speaking } from './states/speaking';
 
 @Component({
   selector: 'app-main-page',
@@ -12,12 +17,13 @@ import { OpenWakeWord } from '../services/open-wake-word';
 export class MainPage implements OnInit {
   color = signal('green');
   text = signal('Speak to change the text');
+  state: MainPageState = new PassiveListening(this);
 
   constructor(
-    private wakeWord: OpenWakeWord,
-    private wakeVad: Vad,
-    private commandVad: Vad,
-    private voiceInteraction: VoiceInteraction,
+    public wakeWord: OpenWakeWord,
+    public wakeVad: Vad,
+    public commandVad: Vad,
+    public voiceInteraction: VoiceInteraction,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -33,24 +39,29 @@ export class MainPage implements OnInit {
       () => this.onMisfire(),
     );
 
+    //li fermo entrambi e lascio che sia la state machine a gestirli
     await this.commandVad.pauseVAD();
+    await this.wakeVad.pauseVAD();
+    await this.state.onEnter();
+  }
+
+  async changeState(newState: MainPageState) {
+    await this.state.onExit();
+    this.state = newState;
+    await this.state.onEnter();
   }
 
   private onWakeWordStartListening() {
     this.color.set('#90EE90');
-    console.log('wakevad startlistening called');
   }
 
   private onWakeWordFinishListening(audio: Float32Array) {
-    //manda al backend senza mettere in pausa
     const audioBlob = float32ToWavBlob(audio);
+    this.changeState(new SendingData(this));
 
     this.wakeWord.check(audioBlob).subscribe(async (response) => {
-      if (!response.wakeWordPresent) return;
-      await this.wakeVad.pauseVAD();
-      await this.commandVad.startVAD().then(() => {
-        this.color.set('red');
-      });
+      if (response.wakeWordPresent) this.changeState(new ActiveListening(this));
+      else this.changeState(new PassiveListening(this));
     });
   }
 
@@ -63,58 +74,15 @@ export class MainPage implements OnInit {
   }
 
   private async onFinishListening(audio: Float32Array) {
-    this.color.set('red');
-    console.log('commandvad onFinishListening called');
-    await this.commandVad.pauseVAD();
-    await this.wakeVad.startVAD();
+    this.changeState(new SendingData(this));
     const audioBlob = float32ToWavBlob(audio);
     //play audio ⬇
     this.voiceInteraction.sendVoiceCommand(audioBlob).subscribe(async (answerAudioBlob) => {
-      const audioUrl = URL.createObjectURL(answerAudioBlob);
-      const audio = new Audio(audioUrl);
-      audio.play().catch((err) => console.error(err));
-      audio.onended = () => {
-        URL.revokeObjectURL(audioUrl);
-      };
+      this.changeState(new Speaking(this, answerAudioBlob));
     });
   }
 
   private onMisfire() {
     this.color.set('red');
-  }
-}
-
-function float32ToWavBlob(float32Array: Float32Array, sampleRate: number = 16000): Blob {
-  const buffer = new ArrayBuffer(44 + float32Array.length * 2);
-  const view = new DataView(buffer);
-
-  // Scrittura Header WAV (RIFF)
-  writeString(view, 0, 'RIFF');
-  view.setUint32(4, 32 + float32Array.length * 2, true);
-  writeString(view, 8, 'WAVE');
-  writeString(view, 12, 'fmt ');
-  view.setUint32(16, 16, true);
-  view.setUint16(20, 1, true); // PCM Lineare
-  view.setUint16(22, 1, true); // Mono
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true);
-  view.setUint16(32, 2, true);
-  view.setUint16(34, 16, true); // 16-bit
-  writeString(view, 36, 'data');
-  view.setUint32(40, float32Array.length * 2, true);
-
-  // Conversione Float32 -> Int16 (PCM)
-  let offset = 44;
-  for (let i = 0; i < float32Array.length; i++, offset += 2) {
-    let s = Math.max(-1, Math.min(1, float32Array[i]));
-    view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7fff, true);
-  }
-
-  return new Blob([buffer], { type: 'audio/wav' });
-}
-
-function writeString(view: DataView, offset: number, string: string) {
-  for (let i = 0; i < string.length; i++) {
-    view.setUint8(offset + i, string.charCodeAt(i));
   }
 }
