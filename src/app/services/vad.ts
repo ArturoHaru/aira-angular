@@ -7,6 +7,7 @@ import { MicVAD } from '@ricky0123/vad-web';
 })
 export class Vad {
   private vadObject: MicVAD | null = null;
+  private initialized: boolean = false;
 
   public async initVad(
     onVAD: () => void,
@@ -17,7 +18,7 @@ export class Vad {
       baseAssetPath: '/',
       onnxWASMBasePath: '/',
       minSpeechMs: 300,
-      redemptionMs: 100,
+      redemptionMs: 700,
       onSpeechStart: () => {
         onVAD();
       },
@@ -28,6 +29,8 @@ export class Vad {
         onMisfire();
       },
     });
+
+    this.initialized = true;
   }
 
   public async startVAD() {
@@ -44,5 +47,18 @@ export class Vad {
     } else {
       console.log('Vad non inizializzato');
     }
+  }
+
+  public async destroyVAD() {
+    if (this.vadObject != null) {
+      await this.vadObject.destroy();
+      this.initialized = false;
+    } else {
+      console.log('Vad non inizializzato');
+    }
+  }
+
+  public IsInit() {
+    return this.initialized;
   }
 }

@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { Vad } from '../services/vad';
 import { VoiceInteraction } from '../services/VoiceInteraction';
+import { OpenWakeWord } from '../services/open-wake-word';
 
 @Component({
   selector: 'app-main-page',
@@ -8,28 +9,64 @@ import { VoiceInteraction } from '../services/VoiceInteraction';
   templateUrl: './main-page.html',
   styleUrl: './main-page.scss',
 })
-export class MainPage {
-  color = signal('red');
+export class MainPage implements OnInit {
+  color = signal('green');
   text = signal('Speak to change the text');
 
   constructor(
-    public commandVad: Vad,
+    private wakeWord: OpenWakeWord,
+    private wakeVad: Vad,
+    private commandVad: Vad,
     private voiceInteraction: VoiceInteraction,
-  ) {
-    commandVad.initVad(
+  ) {}
+
+  async ngOnInit(): Promise<void> {
+    await this.wakeVad.initVad(
+      () => this.onWakeWordStartListening(),
+      async (audio) => this.onWakeWordFinishListening(audio),
+      () => this.onWakeWordMisfire(),
+    );
+
+    await this.commandVad.initVad(
       () => this.onStartListening(),
       async (audio) => this.onFinishListening(audio),
       () => this.onMisfire(),
     );
+
+    await this.commandVad.pauseVAD();
+  }
+
+  private onWakeWordStartListening() {
+    this.color.set('#90EE90');
+    console.log('wakevad startlistening called');
+  }
+
+  private onWakeWordFinishListening(audio: Float32Array) {
+    //manda al backend senza mettere in pausa
+    const audioBlob = float32ToWavBlob(audio);
+
+    this.wakeWord.check(audioBlob).subscribe(async (response: boolean) => {
+      if (!response) return;
+      await this.wakeVad.pauseVAD();
+      await this.commandVad.startVAD().then(() => {
+        this.color.set('red');
+      });
+    });
+  }
+
+  private onWakeWordMisfire() {
+    this.color.set('green');
   }
 
   private onStartListening() {
-    this.color.set('blue');
+    this.color.set('#FF474C');
   }
 
   private async onFinishListening(audio: Float32Array) {
     this.color.set('red');
+    console.log('commandvad onFinishListening called');
     await this.commandVad.pauseVAD();
+    await this.wakeVad.startVAD();
     const audioBlob = float32ToWavBlob(audio);
     //play audio ⬇
     this.voiceInteraction.sendVoiceCommand(audioBlob).subscribe(async (answerAudioBlob) => {
@@ -38,7 +75,6 @@ export class MainPage {
       audio.play().catch((err) => console.error(err));
       audio.onended = () => {
         URL.revokeObjectURL(audioUrl);
-        this.commandVad.startVAD();
       };
     });
   }
