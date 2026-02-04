@@ -4,4 +4,5 @@ export const environment = {
   llmEndpoint: 'lmstudio/answer',
   transcriptionEndpoint: 'speaches/transcribe',
   transcriptionModel: 'kp-forks/faster-whisper-small',
+  openwakewordEndpoint: 'wakeword',
 };

@@ -9,11 +9,13 @@ import { routes } from './app.routes';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { environment } from '../environments/environment';
 import { voicecommandInterceptor } from './interceptor/voicecommand-interceptor';
+import { openwakewordInterceptor } from './interceptor/openwakeword-interceptor';
 
 const interceptors = [];
 
 if (!environment.production) {
   interceptors.push(voicecommandInterceptor);
+  interceptors.push(openwakewordInterceptor);
 }
 
 export const appConfig: ApplicationConfig = {

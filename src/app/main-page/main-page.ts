@@ -45,8 +45,8 @@ export class MainPage implements OnInit {
     //manda al backend senza mettere in pausa
     const audioBlob = float32ToWavBlob(audio);
 
-    this.wakeWord.check(audioBlob).subscribe(async (response: boolean) => {
-      if (!response) return;
+    this.wakeWord.check(audioBlob).subscribe(async (response) => {
+      if (!response.wakeWordPresent) return;
       await this.wakeVad.pauseVAD();
       await this.commandVad.startVAD().then(() => {
         this.color.set('red');
