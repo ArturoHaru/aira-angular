@@ -30,11 +30,19 @@ export class Vad {
     });
   }
 
-  public startVAD() {
+  public async startVAD() {
     if (this.vadObject != null) {
-      this.vadObject.start();
+      await this.vadObject.start();
     } else {
-      console.log('Inizializza prima il vad!');
+      console.log('Vad non inizializzato');
+    }
+  }
+
+  public async pauseVAD() {
+    if (this.vadObject != null) {
+      await this.vadObject.pause();
+    } else {
+      console.log('Vad non inizializzato');
     }
   }
 }

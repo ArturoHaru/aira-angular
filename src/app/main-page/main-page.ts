@@ -1,7 +1,6 @@
 import { Component, signal } from '@angular/core';
 import { Vad } from '../services/vad';
-import { SpeechesService } from '../services/VoiceInteraction';
-import { LLMService } from '../services/LLMService';
+import { VoiceInteraction } from '../services/VoiceInteraction';
 
 @Component({
   selector: 'app-main-page',
@@ -14,37 +13,38 @@ export class MainPage {
   text = signal('Speak to change the text');
 
   constructor(
-    public vad: Vad,
-    private speaches: SpeechesService,
-    private llm: LLMService,
+    public commandVad: Vad,
+    private voiceInteraction: VoiceInteraction,
   ) {
-    vad.initVad(
-      () => {
-        this.color.set('blue');
-      },
-      async (audio) => {
-        let transcription$ = await this.onStopSpeaking(audio);
-        transcription$.subscribe({
-          next: async (transcriptionJson) => {
-            let result$ = await this.llm.sendPrompt(transcriptionJson.text);
-            result$.subscribe({
-              next: (answer) => {
-                this.text.set(answer.content);
-              },
-            });
-          },
-        });
-      },
-      () => {
-        this.color.set('red');
-      },
+    commandVad.initVad(
+      () => this.onStartListening(),
+      async (audio) => this.onFinishListening(audio),
+      () => this.onMisfire(),
     );
   }
 
-  async onStopSpeaking(audio: Float32Array) {
+  private onStartListening() {
+    this.color.set('blue');
+  }
+
+  private async onFinishListening(audio: Float32Array) {
     this.color.set('red');
-    let audio_blob = float32ToWavBlob(audio); //gli metto intestazione wav, altrimenti openai potrebbe non sapere come interpretare il file
-    return this.speaches.speechToText(audio_blob);
+    await this.commandVad.pauseVAD();
+    const audioBlob = float32ToWavBlob(audio);
+    //play audio ⬇
+    this.voiceInteraction.sendVoiceCommand(audioBlob).subscribe(async (answerAudioBlob) => {
+      const audioUrl = URL.createObjectURL(answerAudioBlob);
+      const audio = new Audio(audioUrl);
+      audio.play().catch((err) => console.error(err));
+      audio.onended = () => {
+        URL.revokeObjectURL(audioUrl);
+        this.commandVad.startVAD();
+      };
+    });
+  }
+
+  private onMisfire() {
+    this.color.set('red');
   }
 }
 
