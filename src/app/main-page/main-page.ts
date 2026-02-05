@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, inject, InjectionToken, OnInit, signal } from '@angular/core';
 import { Vad } from '../services/vad';
 import { VoiceInteraction } from '../services/VoiceInteraction';
 import { OpenWakeWord } from '../services/open-wake-word';
@@ -8,7 +8,15 @@ import { SendingData } from './states/sending-data';
 import { float32ToWavBlob } from './audio-converter';
 import { Speaking } from './states/speaking';
 
+export const WAKE_VAD = new InjectionToken<Vad>('wakeVAD');
+export const COMMAND_VAD = new InjectionToken<Vad>('commandVAD');
+
 @Component({
+  standalone: true,
+  providers: [
+    { provide: WAKE_VAD, useClass: Vad },
+    { provide: COMMAND_VAD, useClass: Vad },
+  ],
   selector: 'app-main-page',
   imports: [],
   templateUrl: './main-page.html',
@@ -21,10 +29,11 @@ export class MainPage implements OnInit {
 
   constructor(
     public wakeWord: OpenWakeWord,
-    public wakeVad: Vad,
-    public commandVad: Vad,
     public voiceInteraction: VoiceInteraction,
   ) {}
+
+  wakeVad = inject(WAKE_VAD);
+  commandVad = inject(COMMAND_VAD);
 
   async ngOnInit(): Promise<void> {
     await this.wakeVad.initVad(
