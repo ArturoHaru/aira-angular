@@ -8,6 +8,9 @@ export class PassiveListening implements MainPageState {
 
   async onEnter(): Promise<void> {
     this.context.color.set('green');
+    this.context.microphoneColor.set('white');
+    this.context.text.set('Say "Aira" to interact');
+
     await this.context.wakeVad.startVAD();
   }
 

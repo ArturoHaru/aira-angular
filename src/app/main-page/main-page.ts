@@ -24,7 +24,9 @@ export const COMMAND_VAD = new InjectionToken<Vad>('commandVAD');
 })
 export class MainPage implements OnInit {
   color = signal('green');
-  text = signal('Speak to change the text');
+  microphoneColor = signal('white');
+  text = signal('Say "Aira" to interact');
+
   state: MainPageState = new PassiveListening(this);
 
   constructor(

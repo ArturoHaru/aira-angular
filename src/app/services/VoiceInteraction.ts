@@ -34,6 +34,8 @@ export class VoiceInteraction {
     formData.append('file', audio);
     formData.append('model', environment.transcriptionModel);
 
-    return this.http.post<Blob>(this.interactionAPI, formData);
+    return this.http.post(this.interactionAPI, formData, {
+      responseType: 'blob',
+    });
   }
 }
