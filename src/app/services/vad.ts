@@ -18,7 +18,7 @@ export class Vad {
       baseAssetPath: '/',
       onnxWASMBasePath: '/',
       minSpeechMs: 300,
-      redemptionMs: 100,
+      redemptionMs: 300,
       onSpeechStart: () => {
         onVAD();
       },
