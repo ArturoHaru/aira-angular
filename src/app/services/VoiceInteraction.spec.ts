@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { HttpTestingController } from '@angular/common/http/testing';
 import { SpeechesService } from './VoiceInteraction';
 
 describe('SpeechesService', () => {
@@ -8,7 +8,6 @@ describe('SpeechesService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
       providers: [SpeechesService],
     });
     service = TestBed.inject(SpeechesService);

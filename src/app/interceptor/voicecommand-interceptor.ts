@@ -10,7 +10,7 @@ import { environment } from '../../environments/environment';
  * @returns
  */
 export const voicecommandInterceptor: HttpInterceptorFn = (req, next) => {
-  if (req.url.includes(environment.llmEndpoint) && req.method === 'POST') {
+  if (req.url.includes(environment.interactionEndpoint) && req.method === 'POST') {
     console.log('Intercettata chiamata audio. Generando risposta fake.');
 
     const http = inject(HttpClient);

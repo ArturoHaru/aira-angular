@@ -7,13 +7,13 @@ import { environment } from '../../environments/environment';
   providedIn: 'root',
 })
 export class OpenWakeWord {
-  wakewordEndpoint = environment.openwakewordEndpoint;
+  wakewordEndpoint = `${environment.serverUrl}${environment.openwakewordEndpoint}`;
 
   constructor(private http: HttpClient) {}
 
-  check(audio: Blob): Observable<{ wakeWordPresent: boolean }> {
+  check(audio: Blob): Observable<{ wakeword_detected: boolean }> {
     const formdata = new FormData();
-    formdata.append('file', audio);
-    return this.http.post<{ wakeWordPresent: boolean }>(this.wakewordEndpoint, formdata);
+    formdata.append('audio', audio);
+    return this.http.post<{ wakeword_detected: boolean }>(this.wakewordEndpoint, formdata);
   }
 }

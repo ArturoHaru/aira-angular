@@ -11,7 +11,7 @@ import { environment } from '../../environments/environment';
 })
 export class VoiceInteraction {
   serverUrl = environment.serverUrl;
-  endpointLLM = environment.llmEndpoint;
+  endpointLLM = environment.interactionEndpoint;
   //TODO creare nel backend corrispettivo
   interactionAPI = `${this.serverUrl}${this.endpointLLM}`;
 

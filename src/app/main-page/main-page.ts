@@ -25,7 +25,7 @@ export const COMMAND_VAD = new InjectionToken<Vad>('commandVAD');
 export class MainPage implements OnInit {
   color = signal('green');
   microphoneColor = signal('white');
-  text = signal('Say "Aira" to interact');
+  text = signal('Say "aira" to interact');
 
   state: MainPageState = new PassiveListening(this);
 
@@ -71,7 +71,7 @@ export class MainPage implements OnInit {
     this.changeState(new SendingData(this));
 
     this.wakeWord.check(audioBlob).subscribe(async (response) => {
-      if (response.wakeWordPresent) this.changeState(new ActiveListening(this));
+      if (response.wakeword_detected) this.changeState(new ActiveListening(this));
       else this.changeState(new PassiveListening(this));
     });
   }
