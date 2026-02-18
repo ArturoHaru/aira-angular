@@ -12,7 +12,6 @@ export class Speaking implements MainPageState {
   async onEnter(): Promise<void> {
     this.context.color.set('yellow');
     this.context.microphoneColor.set('gray');
-    await this.context.commandVad.pauseVAD();
     await this.context.wakeVad.startVAD(); //permetti di interrompere se senti la wakeword
 
     const audioUrl = URL.createObjectURL(this.audioBlob);
@@ -26,7 +25,6 @@ export class Speaking implements MainPageState {
   }
 
   async onExit(): Promise<void> {
-    await this.context.commandVad.pauseVAD();
     await this.context.wakeVad.pauseVAD();
 
     if (this.audio === null) return;
