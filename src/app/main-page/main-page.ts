@@ -4,7 +4,7 @@ import { VoiceInteraction } from '../services/VoiceInteraction';
 import { OpenWakeWord } from '../services/open-wake-word';
 import { PassiveListening } from './states/passive-listening';
 import { ActiveListening } from './states/active-listening';
-import { SendingData } from './states/sending-data';
+import { TransferingData } from './states/transfering-data';
 import { float32ToWavBlob } from './audio-converter';
 import { Speaking } from './states/speaking';
 
@@ -68,11 +68,12 @@ export class MainPage implements OnInit {
 
   private onWakeWordFinishListening(audio: Float32Array) {
     const audioBlob = float32ToWavBlob(audio);
-    this.changeState(new SendingData(this));
 
     this.wakeWord.check(audioBlob).subscribe(async (response) => {
-      if (response.wakeword_detected) this.changeState(new ActiveListening(this));
-      else this.changeState(new PassiveListening(this));
+      let currentState = this.state;
+      await this.changeState(new TransferingData(this));
+      if (response.wakeword_detected) await this.changeState(new ActiveListening(this));
+      else await this.changeState(currentState);
     });
   }
 
@@ -85,11 +86,11 @@ export class MainPage implements OnInit {
   }
 
   private async onFinishListening(audio: Float32Array) {
-    this.changeState(new SendingData(this));
     const audioBlob = float32ToWavBlob(audio);
     //play audio ⬇
     this.voiceInteraction.sendVoiceCommand(audioBlob).subscribe(async (answerAudioBlob) => {
-      this.changeState(new Speaking(this, answerAudioBlob));
+      await this.changeState(new TransferingData(this));
+      await this.changeState(new Speaking(this, answerAudioBlob));
     });
   }
 

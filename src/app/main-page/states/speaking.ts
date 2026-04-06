@@ -10,17 +10,17 @@ export class Speaking implements MainPageState {
   audio: HTMLAudioElement | null = null;
 
   async onEnter(): Promise<void> {
-    this.context.color.set('yellow');
-    this.context.microphoneColor.set('gray');
+    this.context.microphoneColor.set('red');
+    this.context.text.set('Say "Alexa" to interrupt');
     await this.context.wakeVad.startVAD(); //permetti di interrompere se senti la wakeword
 
     const audioUrl = URL.createObjectURL(this.audioBlob);
     this.audio = new Audio(audioUrl);
 
     this.audio.play().catch((err) => console.error(err));
-    this.audio.onended = () => {
+    this.audio.onended = async () => {
       URL.revokeObjectURL(audioUrl);
-      this.context.changeState(new PassiveListening(this.context));
+      await this.context.changeState(new PassiveListening(this.context));
     };
   }
 
